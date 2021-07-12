@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempetek.dictionary.server.mapper.DscDictionaryDataMapper">
+
+    <select id="findByPager" parameterType="com.tempetek.dictionary.server.model.po.ReqDictionaryDataParamPO" resultType="com.tempetek.dictionary.server.model.dto.ResDictionaryDataDTO">
+        select dd.id as id, dd.code as code, dd.name as name, d.code as pcode, d.name as pname, dd.creator as creator, dd.create_time as createTime, dd.status as status from dsc_dictionary_data dd
+        left join dsc_dictionary d on d.id = dd.dictionary_id
+        where 1=1
+        <if test="po.pcode != null and po.pcode != ''">
+            and d.code like concat('%', #{po.pcode}, '%')
+        </if>
+        <if test="po.code != null and po.code != ''">
+            and dd.code like concat('%', #{po.code}, '%')
+        </if>
+        <if test="po.name != null and po.name != ''">
+            and dd.name like concat('%', #{po.name}, '%')
+        </if>
+        and dd.whether_deleted is false
+        order by dd.modified_time desc
+    </select>
+
+    <select id="findByPcode" parameterType="java.lang.String" resultType="com.tempetek.dictionary.server.model.dto.ResDictionaryDataListDTO">
+        select id, code, name from dsc_dictionary_data where dictionary_id = (select id from dsc_dictionary where code = #{pcode} and status is true and whether_deleted is false)
+    </select>
+
+    <select id="getItem" parameterType="java.lang.String" resultType="java.lang.String">
+        select name from dsc_dictionary_data where dictionary_id = (select id from dsc_dictionary where code = #{pcode} and status is true and whether_deleted is false) and code = #{code}
+    </select>
+
+</mapper>
